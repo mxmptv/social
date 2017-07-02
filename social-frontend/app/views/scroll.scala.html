@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Social scroll</title>
+
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+
+    <link href="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe.css" rel="stylesheet">
+    <link href="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/default-skin/default-skin.css" rel="stylesheet">
+    <script src="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe.min.js"></script>
+    <script src="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe-ui-default.min.js"></script>
+
+    <style>
+
+    div#topdiv {
+        position:fixed;
+        top:0px;
+        left:0px;
+        width:100%;
+        color:white;
+        background:black;
+        padding:8px;
+    }
+
+    </style>
+
+    <div id="topdiv">Welcome to online social scrollable page :) you can add tags here ->
+        <input id="tag"  type="text" >
+        <button onclick="addTag()"> Add tag</button>
+    </div>
+
+    <script>
+        function addTag() {
+            var tag = $('#tag').val();
+            console.log("tag = " + tag);
+            socket.send("addTag:" + tag)
+        }
+    </script>
+
+
+
+    <style>
+    ul
+    {
+        list-style-type: none;
+    }
+    a{
+        color: white;
+    }
+    img{
+        max-width: 100%;
+
+    }
+    </style>
+
+</head>
+<body bgcolor="black">
+
+<div id="scroll">
+    <ul id="postslist">
+    </ul>
+</div>
+<script>
+    var socket = null;
+
+    window.onload = function () {
+
+
+        var isopen = false;
+
+        socket = new WebSocket("ws://192.168.0.61:9000/ws");
+        socket.binaryType = "arraybuffer";
+        socket.onopen = function () {
+            console.log("Connected!");
+            isopen = true;
+        };
+
+        socket.onmessage = function (e) {
+            if (typeof e.data == "string") {
+                var post = JSON.parse(e.data);
+                console.log("post = " + e.data);
+
+
+                $("#postslist")
+                        .append('<li>' +
+                                    '<div style="text-align:  center">' +
+                                        '<a href=' + post.post_url + ' target=_blank >' +
+                                            '<img  src=' + post.photo_url + '>' + '<br>'+
+                                             post.text + '</a>' + '<br>'+ '<br>'+
+                                    '</div>' +
+                                '</li><br><br>');
+            }
+        };
+
+        socket.onclose = function (e) {
+            console.log("Connection closed.");
+            location.reload();
+        }
+    };
+
+
+</script>
+
+</body>
+</html>

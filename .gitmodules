@@ -1,0 +1,3 @@
+[submodule "osn-crawler"]
+	path = osn-crawler
+	url = https://github.com/mxmptv/osn.crawler.git

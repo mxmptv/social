@@ -1,0 +1,212 @@
+@(serverIp:String)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Social map</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster-src.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://raw.githubusercontent.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css"/>
+
+    <link href="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe.css" rel="stylesheet">
+    <link href="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/default-skin/default-skin.css" rel="stylesheet">
+    <script src="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe.min.js"></script>
+    <script src="http://rawgit.com/dimsemenov/PhotoSwipe/master/dist/photoswipe-ui-default.min.js"></script>
+
+
+    <script>
+            var openPhotoSwipe = function(post) {
+            var pswpElement = document.querySelectorAll('.pswp')[0];
+
+            var items = [
+                {
+                    src: post.photo_url,
+                    w: post.width,
+                    h: post.height,
+                    title: post.text
+                },
+                {
+                    html:
+                    '<br><br><br>' +
+                    '<div style="text-align:center;">' +
+                    '<img  width=200 height=200 src=' + post.user_photo_url + '>' +
+                    '<br>' +
+                    '<a href=' + post.user_url + ' target=_blank style="color:#CCC;">' + post.username + '</a>' +
+                    '<br><br>' +
+                    '<a href=' + post.post_url + ' target=_blank style="color:#CCC;">' + post.text + '</a>' +
+                    '</div>'
+
+                }
+            ];
+
+
+                // define options (if needed)
+            var options = {
+                     // history & focus options are disabled on CodePen
+                history: false,
+                focus: false,
+
+                showAnimationDuration: 0,
+                hideAnimationDuration: 0
+
+            };
+
+            var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
+            gallery.init();
+        };
+    </script>
+</head>
+<body>
+
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+        <div class="pswp__bg"></div>
+
+        <div class="pswp__scroll-wrap">
+
+            <div class="pswp__container">
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+            </div>
+
+            <div class="pswp__ui pswp__ui--hidden">
+
+                <div class="pswp__top-bar">
+
+                    <div class="pswp__counter"></div>
+
+                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                    <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                            <div class="pswp__preloader__cut">
+                                <div class="pswp__preloader__donut"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                    <div class="pswp__share-tooltip"></div>
+                </div>
+
+                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                </button>
+
+                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                </button>
+
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="folium-map" id="map"></div>
+    <script >
+        var southWest = L.latLng(-90, -180);
+        var northEast = L.latLng(90, 180);
+        var bounds = L.latLngBounds(southWest, northEast);
+
+        var map = L.map('map', {
+            center:[59.943082, 30.296922],
+            zoom: 3,
+            maxBounds: bounds,
+            layers: [],
+            crs: L.CRS.EPSG3857,
+            zoomControl:false,
+            attributionControl:false
+        });
+
+        L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        function markerOnClick(marker){
+            openPhotoSwipe(marker.target.options.data)
+        }
+
+        var postsQueue = [];
+
+        window.onload = function() {
+            var isopen = false;
+
+            socket = new WebSocket("ws://@serverIp:9000/ws");
+            socket.binaryType = "arraybuffer";
+            socket.onopen = function() {
+                console.log("Connected!");
+                isopen = true;
+            };
+
+            function addPostToMap(post) {
+//                console.log(post.lat + " " + post.long + " " + post.photo_url);
+                var marker = L.marker([ parseFloat(post.lat),  parseFloat(post.long)], {
+                    icon: new L.Icon.Default(),
+                    data: post
+                }).on('click', markerOnClick).addTo(map);
+                var markerContent = '<img width=40 height=40 src=' + post.icon_url + '>';
+                marker.setIcon(L.divIcon({html: markerContent}));
+                postsQueue.push(marker);
+                console.log("postsQueue.length = " + postsQueue.length);
+                return marker;
+            }
+
+            function removeOldPost() {
+                if (postsQueue.length > 5000) {
+                    var m = postsQueue.shift();
+                    map.removeLayer(m);
+                }
+            }
+
+            socket.onmessage = function(e) {
+                if (typeof e.data == "string") {
+                    console.log("post = " + e.data);
+
+                    var post = JSON.parse(e.data);
+
+                    try {
+                        addPostToMap(post);
+                        removeOldPost();
+                    } catch (err) {
+                        console.log("post without geo");
+                    }
+                }
+            };
+
+            socket.onclose = function(e) {
+                console.log("Connection closed.");
+                location.reload();
+            }
+        };
+    </script>
+
+</body>
+</html>
