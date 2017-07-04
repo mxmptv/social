@@ -8,6 +8,7 @@ import play.api.mvc._
 class ReactiveApplication /*@Inject()(ws: WSClient)*/ extends Controller {
 
   def index = Action {
+
     Ok(views.html.main(getCurrentIp()))
   }
 

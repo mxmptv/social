@@ -1,24 +1,9 @@
 package actors
 
-import java.util
-
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import akka.kafka.ConsumerMessage.CommittableMessage
-import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.stream.ActorMaterializer
-import com.mongodb.BasicDBObject
-import com.mongodb.util.JSON
-import org.apache.kafka.common.serialization.StringDeserializer
+import akka.actor.{Actor, ActorRef, Props}
 import play.api.Logger
-import redis.clients.jedis.{JedisPool, JedisPoolConfig}
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.concurrent.duration._
-
-
-
 
 
 object WebSocketReceiverActor {
